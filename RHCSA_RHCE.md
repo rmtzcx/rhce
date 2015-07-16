@@ -1,8 +1,10 @@
 Summary
 =======
-This document is based on the book Red Hat RHCSA/RHCE 7 Cert Guide: Red Hat
-Enterprise Linux 7 (EX200 and EX300) by Sander van Vugt, and highlights the
-most important parts. I added other things that I consider relevant.
+I based the structure of this document on the book 'Red Hat RHCSA/RHCE 7 Cert
+Guide: Red Hat Enterprise Linux 7 (EX200 and EX300)' by Sander van Vugt.
+
+This is not a tutorial, it is just a guide for me to teach RHCE System
+Administration and help others to prepare for RHCSA/RHCSA exam.
 
 
 Requirements
@@ -82,9 +84,9 @@ There are 3 standard streams:
     | stdin  | Standard input  |  0 |
     | stdout | Standard output |  1 |
     | stderr | Standard error  |  2 |
-    +--------|-----------------|----+
+    +--------+-----------------+----+
 
-There are 2 special streams for network interation:
+There are 2 special streams for network interaction:
 
     /dev/tcp/HOST/PORT
     /dev/udp/HOST/PORT
@@ -117,12 +119,11 @@ How to interact with history:
   * !NUMBER
   * !STRING
 
-There some useful environment variables:
+There some useful environment variables (with my current settings):
 
-  * HISTCONTROL
-  * HISTFILE
-  * HISTSIZE
-  * HISTTIMEFORMAT
+  * HISTCONTROL=ignoreboth
+  * HISTSIZE=10000
+  * HISTTIMEFORMAT='%F %T '
 
 The history command has interesting options:
 
@@ -134,11 +135,12 @@ The history command has interesting options:
 
 
 ### Vim ###
+This is the best vim cheet sheet I know:
 [http://vim.rtorr.com](http://vim.rtorr.com/)
 
 
 ### Shell environment ###
-A shell is an interactive interface to the system. It could be a text or
+A shell is an interactive interface to the system. It could be a text or a
 graphical interface.
 
 
@@ -149,6 +151,8 @@ There are 2 types of variables:
   2. Variables defined by the user without any meaning for the shell.
 
 To see the current shell variables type '**set**'.
+
+__Homework__: Undestand the difference between '**set**' and '**env**'.
 
 To set a variable just type the name of the variable followed by the value.
 
