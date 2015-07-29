@@ -201,9 +201,11 @@ Content of /etc/motd is displayed after the user logs in.
 #### --help ####
 Most of the commands have a --help or -h option.
 
+
 #### help ####
 '**help**' is a bash built-in command that displays the help text from
 built-in commands.
+
 
 #### man ####
 Man pages are organized in sections:
@@ -221,7 +223,7 @@ Man pages are organized in sections:
   * Section n New
 
 The '-k' option for the 'man' command is very useful to find out the correct
-man page. It queries the in the summary. Equivalent to 'apropos'.
+man page. It queries the the summary. Equivalent to 'apropos'.
 
     man -k date
     apropos date
@@ -246,19 +248,275 @@ To update the manual page index caches:
 
 
 #### /usr/share/doc ####
+Programs usually store documentation in this path.
 
 
 Chapter 3. Essential File Management Tools
 ------------------------------------------
+### Working with the File System Hierarchy ###
+#### Defining the File System Hierarchy ####
+The FSH is described in man 7 hier.
+
+Most relevant directories are:
+
+  * /
+  * /bin
+  * /boot
+  * /dev
+  * /etc
+  * /home
+  * /lib, /lib64
+  * /opt
+  * /proc
+  * /root
+  * /run
+  * /sbin
+  * /sys
+  * /tmp
+  * /usr
+  * /var
+
+
+#### Understanding Mounts ####
+/ is the root of the file system. Any other mount point is a subdirectory of
+the root (/).
+
+A mount point is a directory where a file system is 'presented' to the system,
+such as, partitions, logical volumes, or network shares.
+
+Some common mount points are:
+
+  * /boot
+  * /home
+  * /tmp
+  * /var
+
+The 'mount' command can give an overview of the mounted file systems, mount a
+specific file system or even mount all file systems defined in /etc/fstab.
+
+'findmnt' lists all mounted filesytems or search for a file system. It is also
+able to search in /etc/fstab, /etc/mtab or /proc/self/mountinfo.
+
+The 'df -T' command can be useful to display the mounted file systems.
+
+
+### Managing Files ###
+#### Globbing ####
+Globbing is a built-in feature in the shell.
+
+The wildcards are : '?', '*', '[]'.
+
+Globbing is not a regular expression.
+
+#### Managing and Working with Directories ####
+Directory commands:
+
+  * mkdir
+  * cd
+  * rmdir
+  * pushd
+  * popd
+
+
+#### Absolute and Relative Pathnames ####
+All absolute path names start with '/'.
+
+Why sometimes we add ./ to execute a command?
+
+
+#### Listing Files and Directories ####
+Common 'ls' options:
+
+  * ls -l
+  * ls -a
+  * ls -1
+  * ls -lrt
+  * ls -d
+
+**Trivia**: How to list files without 'ls'?
+
+
+#### File operations ####
+
+  * Copy (cp).
+  * Move (mv).
+  * Rename (mv, rename).
+  * Delete (rm, rmdir).
+
+**Trivia**: How to copy a file witout using 'cp', 'rsync', 'scp'?
+
+
+### Using Links ###
+There are 2 types of links:
+
+  * Hard links.
+  * Soft links.
+
+
+#### Hard Links ####
+An inode is an structure that stores information about a file. Some of the
+information is:
+
+  * Ownership (user and group).
+  * Permissions.
+  * Access, change, and modification times.
+  * Hard link counter.
+  * Size.
+  * Blocks.
+  
+The stat system call retrieves a file's inode number and some of the
+information in the inode:
+
+    $ stat /etc/passwd
+      File: ‘/etc/passwd’
+      Size: 2453          Blocks: 8          IO Block: 4096   regular file
+    Device: fd01h/64769d    Inode: 397987      Links: 1
+    Access: (0644/-rw-r--r--)  Uid: (    0/    root)   Gid: (    0/    root)
+    Context: system_u:object_r:passwd_file_t:s0
+    Access: 2015-07-17 23:17:05.283205821 -0500
+    Modify: 2015-07-17 23:17:05.283205821 -0500
+    Change: 2015-07-17 23:17:05.316206175 -0500
+
+A file is removed from the inode table when the link counter is 0.
+
+inodes numbers are shown with ls -i.
+
+Hard links are created with:
+
+    ln
+
+**Note**: The file name is not stored in the inode structure.
+
+
+#### Soft Links ####
+Soft links are 'pointers' to a file name. It has its own inode.
+
+Soft links are created with:
+
+    ln -s
+
+Be very careful when removing soft links pointing to a directory.
+
+
+### Working with Archives and Compressed Files ###
+tar doesn't compress, it just group or ungroup files.
+
+Common options:
+
+  * -c: Create a new archive.
+  * -x: Extract files from an archive.
+  * -v: List files processed.
+  * -f: Specify source or destination.
+  * -C: Change to directory.
+  * -t: List the contents of an archive.
+  * -r: Append files to the end of an archive.
+  * -z: Filter the archive through gzip/gunzip.
+  * -j: Filter the archive through bzip2/bunzip2.
+  * -J: Filter the archive through xz/unxz.
+
+Archive and (un)compress in 2 steps:
+
+    tar -cf /tmp/etc.tar /etc
+    gzip /tmp/etc.tar
+
+    gunzip /tmp/etc.tar.gz
+    tar -xf /tmp/etc.tar
+
+Archive and (un)compress in 1 step:
+
+    tar -zcf /tmp/etc.tar.gz /etc
+
+    tar -zxf /tmp/etc.tar.gz
+
 
 Chapter 4. Working with Text Files
 ----------------------------------
+### Text file tools ###
+
+    * less
+    * cat / tac
+    * more
+    * head
+    * tail
+    * cut
+    * sort
+    * wc
+    * comm
+    * join
+    * paste
+    * expand
+    * unexpand
+    * fmt
+    * grep
+    * sed
+    * awk
+
+**Exercise**: Show lines 10 to 20 in a 30-line file.
+
+**Exercise**: Sort a list of IP addresses.
+
+**Exercise**: Do not show blank lines and comments from a file.
+
+**Exercise**: Create a self extract bash shell. Hint:
+
+    sed -e '0,/^#__SFX__#$/d'
+
 
 Chapter 5. Connecting to Red Hat Enterprise Linux 7
 ---------------------------------------------------
+### Local Consoles ###
+#### Virtual terminals ####
+Also known as virtual consoles
+
+Alt + F1 .. F6
+
+chvt
+
+
+#### Pseudo Terminals Devices ####
+Created when opening a terminal in a graphical environment or remote sessions.
+Pseudo terminal are in /dev/pts
+
+You can know the current terminal with the command 'tty'.
+ls /proc/self/fd
+
+
+#### Reboot and Shutting down a server ####
+
+    init 0
+    poweroff
+    halt
+    systemctl poweroff
+    systemctl halt
+    shutdown -h now
+
+    init 6
+    reboot
+    systemctl reboot
+    shutdown -r now
+    echo b > /proc/sysrq-trigger
+
+
+### SSH and Friends ###
+
+  * ssh (-p, -X, port forward and tunneling, key based auth, ssh-*)
+  * PuTTY
+  * scp
+  * rsync
+
+What is the SSH server fingerprint?
+
+
+#### Terminal Multiplexers ####
+
+    tmux
+    screen
+
 
 Chapter 6. User and Group Management
 ------------------------------------
+
+
 
 Chapter 7. Configuring Permissions
 ----------------------------------
