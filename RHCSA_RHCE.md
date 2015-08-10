@@ -499,33 +499,303 @@ ls /proc/self/fd
 
 ### SSH and Friends ###
 
-  * ssh (-p, -X, port forward and tunneling, key based auth, ssh-*)
+  * ssh
+
+        ssh -p 2222
+        ssh -X
+        ssh -L 8080:localhost:8080
+        ssh -R 8080:localhost:8080
+
+        ssh-keygen
+        ssh-copy-id
+        ssh-agent
+        ssh-add
+
   * PuTTY
   * scp
   * rsync
 
-What is the SSH server fingerprint?
+**Question**: What is the SSH server fingerprint?
+
+**Question**: What is man in the middle attack?
 
 
 #### Terminal Multiplexers ####
 
-    tmux
+    tmux 
+
     screen
 
 
 Chapter 6. User and Group Management
 ------------------------------------
+### User Types ###
 
+  * Privileged.
+  * Unprivileged.
+
+
+Commands:
+
+  * id
+  * whoami
+  * su
+  * sudo
+  * visudo
+
+
+### Accounts ###
+
+  * User accounts
+  * System accounts
+
+User configuration files:
+
+  * /etc/passwd (man 5 passwd)
+  * /etc/shadow (man 5 shadow)
+
+#### Managing Users ####
+
+  * useradd
+  * userdel
+  * usermod
+  * passwd
+  * vipw
+  * vipw -s
+
+Configuration files:
+
+  * /etc/default/useradd
+  * /etc/login.defs
+  * /etc/skel
+  * chage command
+  * passwd command
+
+
+### Group Accounts ###
+
+  * Primary groups
+  * Supplementary groups
+
+
+#### Managing Groups ####
+
+  * groupadd
+  * groupdel
+  * groupmod
+  * gpasswd
+  * vigr
+  * vigr -s
+
+Configuration files:
+
+  * /etc/group
+  * /etc/gshadow
 
 
 Chapter 7. Configuring Permissions
 ----------------------------------
+### File and directories ownership ###
+There are 4 types of basic permissions:
+
+  1. User (owner)
+  2. Group
+  3. Others
+  4. Special bits (suid, guid, sticky)
+
+Read, write, and execute permissions:
+
+    +------------+----------+--------------+-------------------------+
+    | Permission  | Numeric | Files        | Directories             |
+    +-------------+---------+--------------+-------------------------+
+    | Read        |    4    | Open         | List                    |
+    | Write       |    2    | Modify       | File operations         |
+    | Execute     |    1    | Run          | Enter                   |
+    | SUID        |    4    | Run as owner | N/A                     |
+    | SGID        |    2    | Run as group | Inherit group ownership |
+    | Sticky      |    1    | N/A          | Delete own files        |
+    +-------------+---------+--------------+-------------------------+
+
+Example:
+
+    [rmtzcx@rmtzcx01 ~]$ ls -ld /tmp/
+    drwxrwxrwt. 10 root root 240 Jul 30 21:53 /tmp/
+
+Commands:
+
+  * chown
+  * chgrp
+  * chmod
+  * groups
+  * newgrp
+  * umask
+
+
+### Access Control Lists ###
+ACL is a second level permissions. They are supported from the filesystem.
+
+See man 5 acl
+
+    # tune2fs -l /dev/sda1 |grep -i acl
+    Default mount options:    user_xattr acl
+
+Examples:
+
+    # Add read and write permissions to /etc/passwd
+    setfacl -m u:rmtzcx:rw- /etc/passwd
+    setfacl -m g:rmtzcx:rw-,o:rw- /etc/passwd
+
+    # Show the current ACL
+    getfacl /etc/passwd
+
+    # Set effective permission with mask
+    setfacl -m m:r-- /etc/passwd
+
+    # Remove the permissions
+    setfacl -x u:rmtzcx /etc/passwd
+    setfacl -b /etc/passwd
+
+
+### Extended Attributes ###
+
+  * lsattr
+  * chattr
+
 
 Chapter 8. Configuring Networking
 ---------------------------------
+### Networking Fundamentals ###
+
+  * IPv4
+    - 32-bit
+    - 10.0.0.0/8 - Class A
+    - 172.16.0.0/12 - Class B
+    - 192.168.0.0/16 - Class C
+    - Network mask
+    - Gateway
+    - Binary notation
+    - NAT - SNAT/DNAT
+
+  * IPv6
+    - 128-bit
+
+  * Protocols and ports
+    - /etc/services
+    - ftp: 21
+    - ssh: 22
+    - http: 80
+    - https: 443
+
+  * MAC Addresses
+    - 48-bit
+
+
+### Network Addresses and Interfaces ###
+Network addresses are assigned to network cards in 2 ways:
+
+  * Fixed IP.
+  * Dynamically IP (DHCP).
+
+In RHEL7 the network card name nomenclature changed to 'Consistent Network
+Device Namning'.
+
+[See RHEL 7 documentation](https://access.redhat.com/documentation/en-US/Red_Hat_Enterprise_Linux/7/html/Networking_Guide/ch-Consistent_Network_Device_Naming.html)
+
+
+#### Network tools ####
+Check the network configuration:
+
+  * ip address show  (ifconfig -a)
+  * ip route show  (route)
+  * ip link show
+  * ss  (netstat)
+
+**Note**: Old network tools are in the net-tools package.
+
+
+#### Network Manager ####
+Network configuration is handled by the NetworkManager service.
+
+There are several ways to interact with the NetworkManager service:
+
+  * nmcli (Text tool)
+  * nmtui (Interactive text tool)
+  * nm-connection-editor (Graphical tool)
+
+In the NetworkManager context:
+
+  * A device is a network interface card.
+  * A connection is the configuration used on a device.
+
+You can create multiple connections for a device.
+
+Examples:
+
+    nmcli connection show
+    nmcli connection show eth0
+    
+    nmcli devices show
+    nmcli devices show eth0
+
+    nmcli connection add --help
+    nmcli connection add con-name "eth0-static" ifname eth0 autoconnect no type ethernet ip4 172.16.7.4/24
+    nmcli connection modify "eth0-static" connection.autoconnect no
+    nmcli connection modify "eth0-static" ipv4.dns 4.4.4.2
+    nmcli connection modify "eth0-static" +ipv4.dns 8.8.8.8
+    nmcli connection modify "eth0-static" +ipv4.addresses 172.16.7.44/24
+    nmcli connection show "eth0-static"
+    nmcli connection up eth0-static 
+
+
+**Note**: See man nmcli-examples for more examples
+
+All configuration files are kept in /etc/sysconfig/network-scripts 
+
+
+#### Hostname ####
+
+There are different ways to change the hostname:
+
+    * Use nmtui and select the option Change Hostname.
+    * Use hostnamectl set-hostname.
+    * Edit the contents of the configuration file /etc/hostname.
+
+
+and verify with:
+
+    * hostname
+    * hostnamectl status
+
 
 Chapter 9. Managing Processes
 -----------------------------
+### Shell Jobs ###
+
+  * &
+  * Ctrl + c
+  * Ctrl + z
+  * Ctrl + d
+  * fg
+  * bg
+  * jobs
+
+### Processes ###
+
+  * Processes vs Threads
+  * [Kernel threads]
+  * ps aux / ps -ef
+  * ps fax
+  * pstree
+  * pgrep
+  * nice
+  * renice
+
+**Question**: What is a signal?
+
+  * kill
+  * killall
+  * pkill
+  * top
 
 Chapter 10. Working with Virtual Machines
 -----------------------------------------
