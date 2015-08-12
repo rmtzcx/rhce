@@ -799,9 +799,138 @@ Chapter 9. Managing Processes
 
 Chapter 10. Working with Virtual Machines
 -----------------------------------------
+Xen was the official virtualization technology in Red Hat until RHEL 5.
+
+Since RHEL 6 KVM became the official virtualization technology.
+
+KVM support comes directly from the kernel, and it is the backend technology
+used in all Red Hat virtualization and cloud solutions (RHEL, RHEV, Red Hat
+OpenStack, etc.)
+
+KVM requirements are simple:
+
+  * 64-bit CPU (arch)
+  * Hardware virtualization (vmx, svm in /proc/cpuinfo))
+
+Two important modules should be loaded:
+
+    * kvm
+    * kvm_intel or kvm_amd
+
+The easiest way to install virtualization support and related tools is
+
+    yum groupinstall "Virtualization Host"
+    
+**libvirtd** is an interface to interact and manage virtual machines.
+
+There are several tools that use the libvirt API:
+
+  * virt-manager.
+  * virt-viewer.
+  * virsh.
+
+This is how I created the VMs for this training:
+
+    for i in {11..18} ; do
+        virt-install \
+            --name=server$i \
+            --ram=2048 \
+            --vcpus=2 \
+            --location=http://rmtzcx01.rmtzcx.mx/isos/autofs/centos-7.1-x86_64 \
+            --extra="ip=192.168.7.$i netmask=255.255.255.0 dns=192.168.7.1 gateway=192.168.7.1 noipv6 ksdevice=eth0 inst.ks=http://rmtzcx01.rmtzcx.mx/~rmtzcx/ks/el7.cfg inst.repo=http://rmtzcx01.rmtzcx.mx/isos/autofs/centos-7.1-x86_64 hdlayout=server-small hd1=vda kvmguest inst.keymap=us ntpserver=rmtzcx01.rmtzcx.mx fqdn=server$i.rmtzcx.mx selinux=disabled" \
+            --os-type=linux \
+            --os-variant=rhel7 \
+            --disk=size=15 \
+            --network=network=ovsbr1,portgroup=frontend-untagged-vlan192 \
+            --graphics=type=spice \
+            --hvm \
+            --virt-type=kvm &
+    done
+
+Default XML configuration files are stored at:
+
+    /etc/libvirt/qemu
+
+To dump the XML file:
+
+    virsh dump server11
+
+To edit:
+
+    virsh edit server11
+
+To list all running VMs:
+
+    virsh list
+
+To list all VMs
+
+    virsh list --all
+
+To connect to the serial console:
+
+    virsh console server11
+
+(Press Ctrl + ] to exit)
+
+**Note**: Serial console access requires specific configuration within the VM.
+
+To destroy a VM:
+
+    virsh destroy server11
+
+To start a VM:
+
+    virsh start server11
+
+
+### Virtualization and Netwoking ###
+The virtual host server provides physical access to the network. The VMs access
+the network through a 'bridge', usually in one of the following ways:
+
+  1. NAT'ed.
+  2. Bridged.
+
+In NAT'ed mode, the virtual host server acts as a gateway for the VMs.
+
+eth0 in the server is **not** part of the bridge, the server has 2 IPs, one in
+eth0, and other in the bridge. The VM has an IP in the Bridge segment.
+
+    Network <==> eth0 <---> bridge <==> vnet <==> eth0
+               (Server)                           (VM)
+
+In bridged mode, the VMs have direct access to the physical network.
+
+eth0 in the server is part of the bridge, the server has an IP from the Network
+segment in the bridge. The VM has an IP in the Network segment too.
+
+    Network <==> eth0 <==> bridge <==> vnet <==> eth0
+               (Server)                          (VM)
+
+
+There are 2 popular bridging tools:
+
+  1. bridge-utils
+  2. openvswitch
+
+bridge-utils provides basic bridging support. The main command is brctl.
+
+Open vSwitch provides extended and complete support for bridging, VLANs, etc.
+The main command is ovs-vsctl.
+
 
 Chapter 11. Managing Software
 -----------------------------
+yum uses repositories to install software. The repositories are defined in
+files with .repo extension and are usually located at /etc/yum.repos.d.
+
+A repo configuration file can contain several repositories and each repository
+requires the following fields:
+
+  1. [label]
+  2. name=
+  3. baseurl=
+
 
 Chapter 12. Scheduling Tasks
 ----------------------------
