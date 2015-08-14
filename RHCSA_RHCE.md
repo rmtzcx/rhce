@@ -847,13 +847,17 @@ This is how I created the VMs for this training:
             --virt-type=kvm &
     done
 
-Default XML configuration files are stored at:
+XML configuration files are stored by default at:
 
     /etc/libvirt/qemu
 
+Disk images are stored by default at:
+
+    /var/lib/libvirt/images
+
 To dump the XML file:
 
-    virsh dump server11
+    virsh dumpxml server11
 
 To edit:
 
@@ -924,6 +928,8 @@ Chapter 11. Managing Software
 yum uses repositories to install software. The repositories are defined in
 files with .repo extension and are usually located at /etc/yum.repos.d.
 
+Them main configuration file is /etc/yum.conf
+
 A repo configuration file can contain several repositories and each repository
 requires the following fields:
 
@@ -931,9 +937,146 @@ requires the following fields:
   2. name=
   3. baseurl=
 
+Other common options are:
+
+  1. mirrorlist=
+  2. gpgcheck=
+  3. gpgkey=
+
+**Question**: Why is importan gpg keys in yum repositories?
+
+Keys that were used for package signing are installed to the /etc/pki/rpm-gpg
+directory by default.
+
+
+### How to create a YUM repo ###
+
+  1. Install createrepo.
+  2. Copy the RPMs to the target directory.
+  3. Run create /path/to/dir
+  4. Configure the .repo file to use it.
+
+
+### YUM ###
+Common YUM commands:
+
+  * yum search
+  * yum provides
+  * yum info
+  * yum list
+  * yum install
+  * yum remove
+  * yum group list
+  * yum group install
+  * yum update
+  * yum clean all
+  * yum history
+
+
+### RPM ###
+####  Installation options ####
+
+  * rpm -i
+  * rpm -U
+  * rpm -F
+  * rpm -e
+
+#### Query the database ####
+
+  * rpm -q
+  * rpm -qa
+  * rpm -qi
+  * rpm -ql
+  * rpm -qd
+  * rpm -qc
+  * rpm -qf
+  * rpm -q --scripts
+
+#### Query packages ####
+  * rpm -qp
+
+#### Package verification ####
+  * rpm -V
+  * rpm -Va
+  * rpm -q gpg-pubkey
+
 
 Chapter 12. Scheduling Tasks
 ----------------------------
+### Cron ###
+crond wakes up every minute to see if there is anything that you be run.
+
+Verify the status of crond
+
+    systemctl status crond -l
+
+Regular cron files have 6 fields:
+
+  1. Minute
+  2. Hour
+  3. Day of month
+  4. Month
+  5. Day of week
+  6. Task
+
+Exercises:
+
+  * Any minute between 11:00 and 11:59
+  * Every day at 11 a.m. on weekdays only
+  * Every hour on weekdays on the hour
+  * Every 2 hours on the hour on December second and every Friday in December
+
+Global cron file is /etc/crontab, try not to use it. Better use:
+
+  * Cron files in /etc/cron.d
+  * Scripts in /etc/cron.hourly, cron.dialy, cron.weekly, and cron.monthly
+  * User-specific files that are created with crontab -e
+  * /etc/cron.hourly
+  * /etc/cron.daily
+  * /etc/cron.weekly
+  * /etc/cron.monthly
+
+
+#### Anacron ####
+
+Cron run anacron every hour (/etc/cron.hourly).
+
+Anacron runs the job in /etc/cron.{daily,weekly,monthly)}.
+
+Anacron configuration file has 4 fields:
+
+  1. Period in days
+  2. Delay in minutes
+  3. Job ID
+  4. Command
+
+
+#### Cron security ####
+If the {anacron,at,cron}.allow file exists, a user must be listed in it to be
+allowed to use the anacron/at/cron. If the {anacron,at,cron}.allow file does
+not exist but the {anacron,at,cron}.deny file does exist, then a user must not
+be listed in the {anacron,at,cron}.deny file in order to use cron. If neither
+of these files exists, only the super user is allowed to use {anacron,at,cron}.
+
+
+### At ###
+Sometimes you may need to run a job just once, rather than regularly. For this
+you use the at command. (at, atq, atrm)
+
+Verify the status of atd
+
+    systemctl status crond -l
+
+Some examples:
+
+    at -f mycrontest.sh 10:25
+    at -f mycrontest.sh 10pm tomorrow
+    at -f mycrontest.sh 2:00 tuesday
+    at -f mycrontest.sh 2:00 july 11
+    at -f mycrontest.sh 2:00 next week
+
+/etc/at.{allow,deny} files works as cron ones.
+
 
 Chapter 13. Configuring Logging
 -------------------------------
