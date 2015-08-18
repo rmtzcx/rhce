@@ -1,7 +1,10 @@
 Summary
 =======
 I based the structure of this document on the book 'Red Hat RHCSA/RHCE 7 Cert
-Guide: Red Hat Enterprise Linux 7 (EX200 and EX300)' by Sander van Vugt.
+Guide: Red Hat Enterprise Linux 7 (EX200 and EX300)' by Sander van Vugt. If you
+are not able to attend an official Red Hat training for RHCSA/RHCE, I really
+recommend buying Sander van Vugt's book. It is by far the best book to prepare
+yourself for the exams.
 
 This is not a tutorial, it is just a guide for me to teach RHCE System
 Administration and help others to prepare for RHCSA/RHCSA exam.
@@ -1065,7 +1068,7 @@ you use the at command. (at, atq, atrm)
 
 Verify the status of atd
 
-    systemctl status crond -l
+    systemctl status atd -l
 
 Some examples:
 
@@ -1080,6 +1083,77 @@ Some examples:
 
 Chapter 13. Configuring Logging
 -------------------------------
+A log service collects information from services and events in a system. The 2
+main log systems are rsyslog and journald.
+
+
+### rsyslog ###
+rsyslog stores the log in text forma in /var/log.
+
+
+A typical way to monitor rsyslog file is:
+
+    tail -f /var/log/<FILE_NAME>
+
+Common rsyslog files are:
+
+  * /var/log/messages
+  * /var/log/dmesg
+  * /var/log/secure
+  * /var/log/audit/audit.log
+  * ...
+
+Messages are categorized by priorities and facilities. Read SELECTORS section
+on man 5 rsyslog.conf.
+
+The logger command can be used by users to send messages to rsyslog. Examples:
+
+    logger "Hello World"
+    logger -p authpriv.debug "Goodbye World"
+
+**Question**: Where did each message go?
+
+The main configuration file for rsyslog is /etc/rsyslog.conf and it is
+organized in sections:
+
+    * Modules
+    * Global directives
+    * Rules
+
+
+#### Log rotation ####
+What would happen if log were never rotated?
+
+There is a log rotation tool called logrotate which is run daily by cron.
+
+logrotate's main configuration file is /etc/logrotate.conf.
+
+Programs can add logrotate configurations to /etc/logrotate.d.
+
+
+### journald ###
+journald stores the logs in binary format in /run/log/journal. To make the
+journal persistent:
+
+    mkdir /var/log/journal
+    chown root:systemd-journal /var/log/journal
+    chmod 2755 /var/log/journal
+    pkill -USR1 systemd-jounrnald
+
+journalctl can be used to see the logs:
+
+  * systemctl status <UNIT>
+  * journalctl
+  * journalctl -f
+  * journalctl -b
+  * journalctl -p err
+  * journalctl --since yesterday (or YYY-MM-DD)
+  * journalctl <TAB> <TAB> (if bash-completion is installed)
+  * journalctl _SYSTEMD_UNIT=sshd.service --no-pager
+
+
+The main configuration file is /etc/systemd/journald.conf
+
 
 Chapter 14. Managing Partitions
 -------------------------------
