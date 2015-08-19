@@ -1157,6 +1157,82 @@ The main configuration file is /etc/systemd/journald.conf
 
 Chapter 14. Managing Partitions
 -------------------------------
+There are 2 types of partition tables:
+
+  * MBR (or msdos)
+  * GPT
+
+Common disk types in Linux:
+
+  * /dev/hda (PATA/IDE)
+  * /dev/sda (SCSI/SAS/SATA)
+  * /dev/vda (KVM/virtio)
+  * /dev/xvda (Xen driver/PVHVM)
+  * /dev/cciss/c0d0 (HP smart array)
+
+
+### MBR ###
+
+  * 4 primary partitions, 1 extended (counts as primary), and up to 15 logical
+  * 2 TB limit
+
+
+### GPT ###
+
+  * Required for UEFI.
+  * Maximum size is 8 ZB (no 2 TB limit).
+  * Up to 128 partitions (No primary, extended, nor logical).
+
+**Question**: Megabyte vs Mebibyte?
+
+
+### Partitioning Tools ###
+
+  * fdisk
+  * cfdisk
+  * gdisk
+  * parted
+
+File system IDs:
+
+  * 82: swap
+  * 83: ext2/3/4
+  * 8e: LVM
+
+
+### Filesystem Tools ###
+
+  * mkfs -t / fsck -t
+  * mkfs.ext2 / fsck.ext2
+  * mkfs.ext3 / fsck.ext3
+  * mkfs.ext4 / fsck.ext4
+  * mkfs.xfs / fsck.xfs
+  * mkfs.btrfs / fsck.btrfs
+  * mkfs.vfat / fsck.vfat
+  * tune2fs
+  * xfs\_admin (and friends xfs\_*)
+  * mkswap / swapon / swapoff
+
+
+### Mounting and umounting filesystems ###
+When a file system is mounted in a directory, that directory is know a mount
+point.
+
+In order to mount a file system you need to know:
+
+  1. Source (Physical location of the file system: vda1, sda1)
+  2. Destination (Mount point: /, /boot, /home)
+  3. Type (ext3, ext4, xfs)
+  4. Mount options (defaults, noatime, noexec, nodev, nosuid, ro, rw, _netdev)
+
+Relevant commands:
+
+  * mount
+  * umount
+  * blkid
+  * /etc/fstab
+  * /etc/mtab
+
 
 Chapter 15. Managing LVM Logical Volumes
 ----------------------------------------
