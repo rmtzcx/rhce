@@ -1230,15 +1230,92 @@ Relevant commands:
   * mount
   * umount
   * blkid
+  * lsblk
   * /etc/fstab
   * /etc/mtab
 
 
 Chapter 15. Managing LVM Logical Volumes
 ----------------------------------------
+There are 3 important concepts:
+
+  * Physical volume (PV)
+  * Logical volume (LV)
+  * Volume group (VG)
+
+Diagram:
+
+    +-------------------------------------+
+    | VG                                  |
+    | +---------+ +------+ +------------+ |
+    | |         | |      | |            | |
+    | |   LV    | |  LV  | |     LV     | |
+    | |         | |      | |            | |
+    | +---------+ +------+ +------------+ |
+    | +------+ +------+ +------+ +------+ |
+    | |      | |      | |      | |      | |
+    | |  PV  | |  PV  | |  PV  | |  PV  | |
+    | |      | |      | |      | |      | |
+    | +------+ +------+ +------+ +------+ |
+    +-------------------------------------+
+
+
+Essential commands:
+
+  * lvm
+  * lvmconf
+  * pvcreate / pvremove
+  * pvs
+  * pvdisplay
+  * vgcreate / vgremove
+  * vgs
+  * vgdisplay
+  * lvcreate / lvremove
+  * lvs
+  * lvdisplay
+
+Other useful commands
+
+  * pvscan
+  * pvchange
+  * pvmove
+  * pvresize
+  * vgscan
+  * vgchange
+  * vgextend / vgreduce
+  * lvscan
+  * lvchange
+  * lvresize / lvextend / lvreduce
+
 
 Chapter 16. Basic Kernel Management
 -----------------------------------
+Relevant commands:
+
+  * uname
+  * hostnamectl status
+  * dmesg / journalctl --dmesg
+
+### UDEV ###
+systemd-udevd takes care of loading the appropriate driver and making the
+hardware device available. It initializes the devices using the rules in
+/usr/lib/udev/rules.d and /etc/udev/rules.d.
+
+Satus about the kernel modules and associated hardware is written to the sysfs
+file system.
+
+The main UDEV program is udevadm.
+
+
+### Kernel modules ###
+
+  * lspci -k
+  * lsmod
+  * modinfo
+  * modprobe
+  * rmmod
+  * /etc/modprobe.d
+
 
 Chapter 17. Configuring a Basic Apache Server
 ---------------------------------------------
