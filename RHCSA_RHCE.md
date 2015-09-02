@@ -1372,7 +1372,8 @@ There are two types of virtual hosts:
 **Exercise**: Virtual hosts
 
     # Add hostnames to /etc/hosts
-    echo -e "$(hostname -i)\t$(hostname -s)v1.rmtzcx.mx\n$(hostname -i)\t$(hostname -s)v2.rmtzcx.mx" >>/etc/hosts
+    echo "$(hostname -i)\t$(hostname -s)v1.rmtzcx.mx" >>/etc/hosts
+    echo "$(hostname -i)\t$(hostname -s)v2.rmtzcx.mx" >>/etc/hosts
 
     # Create directory
     mkdir -p 750 /var/www/vhosts/{v1,v2}
