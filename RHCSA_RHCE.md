@@ -1319,6 +1319,25 @@ The main UDEV program is udevadm.
 
 Chapter 17. Configuring a Basic Apache Server
 ---------------------------------------------
+To install Apache HTTPD:
+
+    yum install httpd
+
+Or
+
+    yum group install "Basic Web Server"
+
+Configuration files are located at:
+
+  * /etc/httpd/conf
+  * /etc/httpd/conf.d
+
+Important directives for a basic configuration:
+
+  * DocumentRoot
+  * ServerRoot
+
+Text-based browser is elinks.
 
 Chapter 18. Managing and Understanding the Boot Procedure
 ----------------------------------------------------------
