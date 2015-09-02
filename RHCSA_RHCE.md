@@ -436,23 +436,23 @@ Chapter 4. Working with Text Files
 ----------------------------------
 ### Text file tools ###
 
-    * less
-    * cat / tac
-    * more
-    * head
-    * tail
-    * cut
-    * sort
-    * wc
-    * comm
-    * join
-    * paste
-    * expand
-    * unexpand
-    * fmt
-    * grep
-    * sed
-    * awk
+  * less
+  * cat / tac
+  * more
+  * head
+  * tail
+  * cut
+  * sort
+  * wc
+  * comm
+  * join
+  * paste
+  * expand
+  * unexpand
+  * fmt
+  * grep
+  * sed
+  * awk
 
 **Exercise**: Show lines 10 to 20 in a 30-line file.
 
