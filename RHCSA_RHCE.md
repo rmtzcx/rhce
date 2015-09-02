@@ -1331,13 +1331,87 @@ Configuration files are located at:
 
   * /etc/httpd/conf
   * /etc/httpd/conf.d
+  * /etc/httpd/conf.modules.d
 
 Important directives for a basic configuration:
 
   * DocumentRoot
   * ServerRoot
 
-Text-based browser is elinks.
+**Exercise**: Hello World
+
+    # Install
+    yum install httpd elinks
+
+    # Create index
+    echo "Hello World" >/var/www/html/index.html
+
+    # Fix permissions and ownership
+    chown root:apache /var/www/html/index.html
+    chmod 640 /var/www/html/index.html
+
+    # Start service
+    systemctl start httpd
+    systemctl status httpd
+
+    # Test
+    elinks http://localhost
+
+
+### Virtual hosts ###
+There are two types of virtual hosts:
+
+  1. IP-based
+     One IP address per virtual host
+
+  2. Name-based
+     One IP for all virtual hosts.
+     SSL support for one virtual host
+
+
+**Exercise**: Virtual hosts
+
+    # Add hostnames to /etc/hosts
+    echo -e "$(hostname -i)\t$(hostname -s)v1.rmtzcx.mx\n$(hostname -i)\t$(hostname -s)v2.rmtzcx.mx" >>/etc/hosts
+
+    # Create directory
+    mkdir -p 750 /var/www/vhosts/{v1,v2}
+
+    # Create indexes
+    echo "Hello World from v1" >/var/www/vhosts/v1/index.html
+    echo "Hello World from v2" >/var/www/vhosts/v2/index.html
+
+    # Add virtual host configuration
+    cat >/etc/httpd/conf.d/vhosts.conf <<EOF
+    <Directory /var/www/vhosts>
+        Require all granted
+        AllowOverride None
+    </Directory>
+
+    <VirtualHost *:80>
+        DocumentRoot /var/www/vhosts/v1
+        ServerName $(hostname -s)v1.rmtzcx.mx
+        ErrorLog logs/v1-error_log
+        CustomLog logs/v1-access_log common
+    </VirtualHost>
+
+    <VirtualHost *:80>
+        DocumentRoot /var/www/vhosts/v2
+        ServerName $(hostname -s)v2.rmtzcx.mx
+        ErrorLog logs/v2-error_log
+        CustomLog logs/v2-access_log common
+    </VirtualHost>
+    EOF
+
+    # Restart service
+    systemctl restart httpd
+
+    # Test
+    elinks http://$(hostname -s)v1.rmtzcx.mx
+
+    elinks http://$(hostname -s)v2.rmtzcx.mx
+
+
 
 Chapter 18. Managing and Understanding the Boot Procedure
 ----------------------------------------------------------
