@@ -1413,12 +1413,150 @@ There are two types of virtual hosts:
     elinks http://$(hostname -s)v2.rmtzcx.mx
 
 
-
 Chapter 18. Managing and Understanding the Boot Procedure
 ----------------------------------------------------------
+### Systemd ###
+_units_ is the key concept in systemd.
+
+    # systemctl -t help
+    Available unit types:
+    service
+    socket
+    target
+    device
+    mount
+    automount
+    snapshot
+    timer
+    swap
+    path
+    slice
+    scope
+
+Default system units are in /usr/lib/systemd/system.
+
+Customized units can be placed at /etc/systemd/system
+
+#### Service units ####
+
+Service units contains 3 sections:
+
+  * [Unit]: Description and dependencies (After, Before).
+  * [Service]: How to start (ExecStart), and stop (ExecStop) a service.
+  * [Install]: 'Wants' handling.
+
+To see all available options for a unit:
+
+    systemctl show [UNIT]
+
+To see a general overview of the active service units:
+
+    systemctl -t service
+    systemctl list-units -t service
+
+To include inactive unit services:
+
+    systemctl list-units -t service --all
+
+To see failed service units:
+
+    systemctl list-units -t service --failed
+
+To see the individual status of a service unit:
+
+    systemctl [-l] status [UNIT]
+
+Different status are:
+
+  * Loaded
+  * Active(running)
+  * Active(exited)
+  * Active(waiting)
+  * Inactive
+  * Enabled
+  * Disabled
+  * Static
+
+To see dependencies:
+    
+    systemctl list-dependencies [UNIT]
+    systemctl list-dependencies [UNIT] --reverse
+
+
+#### Target units ####
+A target unit is a set of units and they are similar to runlevels.
+
+Units are grouped based on the 'Wants' key.
+
+To see the units that will be started in a target:
+
+    ls /etc/systemd/system/[TARGET].wants
+
+To see a general overview of the active target units:
+
+    systemctl -t target
+    systemctl list-units -t target
+
+To use a target that support isolation:
+
+    systemctl isolate [TARGET].target
+
+To get the current default target:
+
+    systemctl get-default
+
+To set the current default target:
+
+    systemctl set-default
+
+
+#### Administraining Units ####
+
+To enable a unit:
+
+    systemctl enable [UNIT]
+
+To disable:
+
+    system disable [UNIT] 
+
+    system mask [UNIT]
+
+
+### GRUB ###
+The main configuration file is:
+
+    /etc/default/grub
+
+To see the boot parameters help:
+
+    man bootparams
+
+To apply changes after modifying the config file:
+
+    grub2-mkconfig -o /boot/grub2/grub.cfg
+
 
 Chapter 19. Troubleshooting the Boot Procedure
 ----------------------------------------------
+### Boot process ###
+
+  1. Basic hardware initialization (BIOS/UEFI)
+  2. Bootable device
+  3. Boot loader
+  4. Kernel
+  5. /sbin/init
+  6. init.target
+  7. Switch to the root filesystem
+  8. default.target
+
+**Exercise**: Interact with grub (rd.break, mount -o remount /sysroot, chroot,
+passwd, load_policy -i, chcon -t shadow_t).
+
+**Exercise**: Installation media rescue mode ((rub2-install, dracut)
+
+**Exercise**: Access VM disks (kpartx -av, vgscan)
+
 
 Chapter 20. Using Kickstart
 ---------------------------
