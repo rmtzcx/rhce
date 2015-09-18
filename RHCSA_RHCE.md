@@ -1777,9 +1777,9 @@ Chapter 22. Configuring a Firewall
 ----------------------------------
 Main commands:
 
-    * iptables
-    * firewall-cmd (CLI)
-    * firewall-config (GUI)
+  * iptables
+  * firewall-cmd (CLI)
+  * firewall-config (GUI)
 
 Firewalld works with zones. A zone is a set of rules that are applied to
 incoming packets. Available zones are (man firewalld.zones):
@@ -1806,6 +1806,8 @@ To see the current zone:
 
     firewall-cmd --get-default-zone
 
+Note that the new zone definition is stored at /etc/firewalld/zones/
+
 To list all available services:
 
     firewall-cmd --get-services
@@ -1818,21 +1820,75 @@ To add a permanent service to the current zone:
 
     firewall-cmd --add-service=vnc --permanent
 
-Note that the new zone definition is stored at /etc/firewalld/zones/
+Service definitions are at /usr/lib/firewalld/services/
 
 To add a port:
 
     firewall-cmd --add-port=2222/tcp --permanent
 
-Service definitions are at /usr/lib/firewalld/services/
-
 
 Chapter 23. Configuring Remote Mounts and FTP
 ---------------------------------------------
 
+
 Chapter 24. Configuring Time Services
 -------------------------------------
+Key concepts:
 
+  * Hardware clock
+  * System clock
+  * UTC
+  * GMT
+  * Timezone
+  * DST
+  * NTP
+  * Epoch time
+
+Key software:
+
+  * chrony
+  * ntp
+
+Key commands:
+
+  * date
+  * hwclock
+  * timedatectl
+
+
+Using date:
+
+    date
+
+    date --iso
+
+    date +%F
+
+    date -s 12:00
+
+Using hwclock:
+
+    hwclock -c
+
+    hwclock --systohc
+
+    hwclock --hctosys
+
+Using timedatectl
+
+    timedatectl
+
+    timedatectl set-time 00:03
+
+    timedatectl list-timezones
+
+    timedatectl set-timezone  # All zones are at /usr/share/zoneinfo.
+
+    timedatectl set-ntp 1  # Enables chronyd. See /etc/chrony.conf
+
+To find a timezone:
+
+    tzselect
 
 Part 2: RHCE
 ============
