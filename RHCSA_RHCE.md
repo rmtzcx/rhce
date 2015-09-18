@@ -1775,6 +1775,57 @@ You can install policycoreutils-gui and execute system-config-selinux.
 
 Chapter 22. Configuring a Firewall
 ----------------------------------
+Main commands:
+
+    * iptables
+    * firewall-cmd (CLI)
+    * firewall-config (GUI)
+
+Firewalld works with zones. A zone is a set of rules that are applied to
+incoming packets. Available zones are (man firewalld.zones):
+
+  * drop
+  * block
+  * public
+  * external
+  * dmz
+  * work
+  * home
+  * internal
+  * trusted
+
+The zone is stored into the ifcfg of the connection with ZONE=option.
+
+Zone definitions are at /usr/lib/firewalld/zones/
+
+To list all available zone:
+
+    firewall-cmd --get-zones
+
+To see the current zone:
+
+    firewall-cmd --get-default-zone
+
+To list all available services:
+
+    firewall-cmd --get-services
+
+To see the available services in the current zone:
+
+    firewall-cmd --list-services
+
+To add a permanent service to the current zone:
+
+    firewall-cmd --add-service=vnc --permanent
+
+Note that the new zone definition is stored at /etc/firewalld/zones/
+
+To add a port:
+
+    firewall-cmd --add-port=2222/tcp --permanent
+
+Service definitions are at /usr/lib/firewalld/services/
+
 
 Chapter 23. Configuring Remote Mounts and FTP
 ---------------------------------------------
