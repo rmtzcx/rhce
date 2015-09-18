@@ -1560,9 +1560,218 @@ passwd, load_policy -i, chcon -t shadow_t).
 
 Chapter 20. Using Kickstart
 ---------------------------
+### Setting up an installation server ###
+To install a provisioning server:
+
+  * Make the installation media available over the network (NFS, FTP, HTTP).
+  * A DHCP server.
+  * A TFTP/PXE server.
+  * Kickstart file.
+
+To install the required software:
+  
+    # Install required software 
+    yum install httpd dhcp tftp-server syslinux
+
+    # Enable the services at boot time
+    systemctl enable httpd dhcpd xinetd
+
+    # Make the installation media through HTTPD
+
+    # Enable TFTP in /etc/xinetd.d/tftp and copy PXE files from syslinux rpm.
+
+    # Configure DHCP in /etc/dhcp/dhcpd.conf
+
+    # Use system-config-kickstart to create a kickstart file.
+
 
 Chapter 21. Managing SELinux
 ----------------------------
+Key concepts:
+
+  * Policy (collection of rules)
+  * Source domain (user, process)
+  * Target domain (file, port)
+  * Context (label)
+  * Rule
+
+A context has the following syntax: identity:role:type
+
+The most important part is the 'type'
+
+Most commands that support SELinux contexts use the -Z option to print them,
+for example, ls -Z or ps -Z
+
+The default configuration file:
+
+    /etc/selinux/config
+
+Three modes:
+
+  1. Disabled
+  2. Permissive
+  3. Enforcing
+
+To get current mode:
+
+    getenforce
+
+    sestatus
+
+To change between permissive and enforcing  modes:
+
+    setenforce 0
+    
+    setenforce 1
+
+semanage is used to configure certain elements of SELinux policy without
+requiring modification to or recompilation from policy sources. This includes
+the mapping from Linux usernames to SELinux user identities (which controls the
+initial security context assigned to Linux users when they login and bounds
+their authorized role set) as well as security context mappings for various
+kinds of objects, such as network ports, interfaces, and nodes (hosts) as well
+as the file context mappings.
+
+
+### User identities  ###
+To see the current context for the logged user:
+
+    id -Z
+
+Exercise: Change a user SELinux mapping
+
+    # See current SELinux users
+    semanage user -l
+
+    # See current mappings
+    semanage login -l
+
+    # Map a Linux user to a SELinux user
+    semanage login -a -s user_u user1
+
+    # See current mappings again
+    semanage login -l
+
+    # Start session with user1 and verify the context
+    id -Z
+
+    # Note: users mapped to user_u cannot become root with sudo nor su.
+
+
+### File contexts ###
+All files have a SELinux context:
+
+    [root@rmtzcx01 ~]# ls -Z /etc/{passwd,shadow,profile} /bin/passwd /usr/bin/cat
+    -rwsr-xr-x. root root system_u:object_r:passwd_exec_t:s0 /bin/passwd
+    -rw-r--r--. root root system_u:object_r:passwd_file_t:s0 /etc/passwd
+    -rw-r--r--. root root system_u:object_r:etc_t:s0         /etc/profile
+    ----------. root root system_u:object_r:shadow_t:s0      /etc/shadow
+    -rwxr-xr-x. root root system_u:object_r:bin_t:s0         /usr/bin/cat
+
+**Exercise**: Work with file contexts
+
+    # Install Apache HTTPD
+    yum install httpd
+
+    # Let's add a new directory and see the context
+    mkdir /www
+    ls -Zd /www/
+
+    # Add a .conf file for the new directory:
+    cat >/etc/httpd/conf.d/www.conf <<EOF
+    Alias /www/ "/www/"
+
+    <Directory "/www">
+        Options Indexes
+        Require all granted
+        AllowOverride None
+    </Directory>
+    EOF
+
+    # Set Linux permissions
+    chown -R root:apache /www/
+
+    # Restart httpd
+    systemctl restart httpd
+
+    # Monitor audit logs and try to access the web directory
+    tail -f /var/log/audit/audit.log | grep type=AVC
+
+    # Set the correct context
+    chcon --reference /var/www/html /www
+
+    # However restorecon or any new file will not have the proper context.
+    # Add the correct context to the new directory to SELinux
+    semanage fcontext -a -t httpd_sys_content_t "/www(/.*)?"
+    semanage fcontext -l | grep ^/www
+    restorecon -R -v /www/
+    touch /www/index.html
+    ls -lZ /www
+
+
+### Port context ###
+Network ports have SELinux contexts too. For example:
+
+    semanage port -l | grep http
+
+We can add new network ports:
+
+    semanage port -a -t http_port_t -p tcp 81
+
+
+### Process ###
+Processes have SELinux contexts as well. See the process context with:
+
+    ps -eZ
+    ps axZ
+
+
+### Booleans ###
+booleans are if-then-else rules written in SELinux Policy. They can be used to
+customize the way that SELinux Policy rules effect a confined domain.
+
+To see a description of all booleans:
+
+    semanage boolean -l
+
+To see value of a boolean:
+
+    getsebool user_exec_content
+
+To set the value of a boolean:
+
+    setsebool user_exec_content=0 # To make the change persistent add -P
+
+
+### Troubleshoot ###
+SELinux stores the logs in /var/log/audit/audit.log
+
+ausearch is a tool that can query the audit daemon logs based for events based
+on different search criteria.
+
+sealert is the user interface component (either GUI or command line) to the
+setroubleshoot system. setroubleshoot is used to diagnose SELinux denials and
+attempts to provide user friendly explanations for a SELinux denial (e.g. AVC)
+and recommendations for how one might adjust the system to prevent the denial
+in the future.
+
+aureport is a tool that produces summary reports of the audit system logs.
+
+setroubleshoot is used to diagnose SELinux denials and attempts to provide user
+friendly explanations for a SELinux denial (e.g. AVC) and recommendations for
+how one might adjust the system to prevent the denial in the future.
+
+**Examples**:
+
+    ausearch -m avc -c httpd -f www
+
+    sealert -a /var/log/audit/audit.log
+
+    sealert -b
+
+    
+You can install policycoreutils-gui and execute system-config-selinux.
+
 
 Chapter 22. Configuring a Firewall
 ----------------------------------
